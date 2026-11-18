@@ -145,7 +145,11 @@ function piiModel(value: unknown): PiiModel {
 
 type Table = Record<string, unknown>;
 const table = (v: unknown): Table => (v && typeof v === "object" && !Array.isArray(v) ? (v as Table) : {});
-const trimSlash = (s: string) => s.replace(/\/+$/, "");
+const trimSlash = (s: string) => {
+  let end = s.length;
+  while (end > 0 && s[end - 1] === "/") end--;
+  return s.slice(0, end);
+};
 
 export function fromToml(data: Table, base: Config = defaultConfig()): Config {
   const cfg: Config = { ...base, entities: { ...base.entities }, custom: [...base.custom] };

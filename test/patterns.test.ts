@@ -77,7 +77,7 @@ describe("secrets", () => {
     ["xoxb-1234567890-abcdefghij", "slack"],
     // Built from parts so secret scanners don't flag this fake key.
     [["sk", "live", "4eC39HqLyjWDarjtT1zdp7dc"].join("_"), "stripe"],
-    ["AIzaSyA-1234567890abcdefghijklmnopqrstu", "google_api_key"],
+    [["AIza", "SyA-1234567890abcdefghijklmnopqrstu"].join(""), "google_api_key"],
     ["eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U", "jwt"],
   ])("finds %s", (text, kind) => {
     expect([...findSecrets(`config: ${text} end`)].map((f) => [f.detector, f.text])).toEqual([
@@ -116,4 +116,17 @@ it("prefers checksummed formats where findings overlap", () => {
   const b: Finding = { ...a, entity: "CREDIT_CARD", score: 1 };
   const c: Finding = { entity: "PERSON", start: 25, end: 30, text: "Alice", score: 0.9, detector: "ner" };
   expect(resolveOverlaps([a, b, c])).toEqual([b, c]);
+});
+
+it("merges WordPiece continuations into one word", async () => {
+  const { mergeWordPieces } = await import("../src/detectors/models.js");
+  const merged = mergeWordPieces([
+    { label: "B-PER", score: 0.99, start: 0, end: 1 },
+    { label: "O", score: 0.6, start: 1, end: 8, continuation: true },
+    { label: "I-PER", score: 0.98, start: 9, end: 15 },
+  ]);
+  expect(merged).toEqual([
+    { label: "B-PER", score: 0.99, start: 0, end: 8 },
+    { label: "I-PER", score: 0.98, start: 9, end: 15 },
+  ]);
 });

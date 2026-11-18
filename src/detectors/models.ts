@@ -184,6 +184,27 @@ interface Token {
   score: number;
   start: number | null;
   end: number | null;
+  /** A WordPiece continuation ("##riyanka"): part of the previous token's word. */
+  continuation?: boolean;
+}
+
+/**
+ * Merge WordPiece continuations into the token that starts their word. The word takes the
+ * label and score of its first piece (Hugging Face's "first" strategy), so a name split into
+ * "P" + "##riyanka" isn't lost when one piece scores lower than the other.
+ */
+export function mergeWordPieces(tokens: Token[]): Token[] {
+  const out: Token[] = [];
+  for (const tok of tokens) {
+    const prev = out.at(-1);
+    if (tok.continuation && prev && tok.end !== null) {
+      prev.end = tok.end;
+      if (prev.start === null) prev.start = tok.start;
+    } else {
+      out.push({ ...tok });
+    }
+  }
+  return out;
 }
 
 /** Run a token classifier and line each token up with its characters in the original text. */
@@ -208,9 +229,9 @@ async function classifyTokens(tokenizer: Any, model: Any, text: string): Promise
       end: null,
     };
     if (!special.has(id)) {
-      const piece = String(tokenizer.decode([id], { skip_special_tokens: true }))
-        .replace(/^##/, "")
-        .trim();
+      const raw = String(tokenizer.decode([id], { skip_special_tokens: true }));
+      token.continuation = raw.startsWith("##");
+      const piece = raw.replace(/^##/, "").trim();
       if (piece && !piece.includes("�")) {
         const at = text.indexOf(piece, cursor);
         if (at >= 0 && at - cursor <= 64) {
@@ -302,7 +323,7 @@ class TokenClassifier implements PiiModel {
     for (const text of texts) {
       const found: Finding[] = [];
       for (const w of windows(text, this.windowSize, 200)) {
-        const tokens = await classifyTokens(tokenizer, model, w.text);
+        const tokens = mergeWordPieces(await classifyTokens(tokenizer, model, w.text));
         for (const f of joinTokens(
           w.text,
           tokens,
