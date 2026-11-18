@@ -76,6 +76,8 @@ export interface Config {
 
   /** Keys clients use for proxshield itself. Empty means no key is required. */
   apiKeys: Set<string>;
+  /** Start without `apiKeys` on a public address even with a provider key on the server. */
+  allowUnauthenticated: boolean;
   /** `models` (real models) or `fake` (keyword matching, for tests). */
   backend: "models" | "fake";
   /** Where models are downloaded. */
@@ -105,6 +107,7 @@ export function defaultConfig(overrides: Partial<Config> = {}): Config {
     blockMode: "error",
     refusalMessage: "I can't help with that request.",
     apiKeys: new Set(),
+    allowUnauthenticated: false,
     backend: "models",
     preload: true,
     maxBodyBytes: 4 * 1024 * 1024,
@@ -209,6 +212,7 @@ export function fromToml(data: Table, base: Config = defaultConfig()): Config {
   }
   if (srv.refusal_message !== undefined) cfg.refusalMessage = String(srv.refusal_message);
   if (srv.max_body_bytes !== undefined) cfg.maxBodyBytes = Number(srv.max_body_bytes);
+  if (srv.allow_unauthenticated !== undefined) cfg.allowUnauthenticated = Boolean(srv.allow_unauthenticated);
   return cfg;
 }
 
@@ -235,6 +239,8 @@ export function loadConfig(path?: string, env: NodeJS.ProcessEnv = process.env):
     cfg.backend = env.PROXSHIELD_BACKEND;
   if (env.PROXSHIELD_PII_MODEL) cfg.piiModel = piiModel(env.PROXSHIELD_PII_MODEL);
   if (env.PROXSHIELD_INJECTION_MODEL) cfg.injectionModel = injectionModel(env.PROXSHIELD_INJECTION_MODEL);
+  if (env.PROXSHIELD_ALLOW_UNAUTHENTICATED !== undefined)
+    cfg.allowUnauthenticated = truthy(env.PROXSHIELD_ALLOW_UNAUTHENTICATED);
   if (env.PROXSHIELD_PRELOAD !== undefined) cfg.preload = truthy(env.PROXSHIELD_PRELOAD);
   if (env.PROXSHIELD_INJECTION_THRESHOLD) cfg.injectionThreshold = Number(env.PROXSHIELD_INJECTION_THRESHOLD);
   if (env.PROXSHIELD_BLOCK_MODE === "error" || env.PROXSHIELD_BLOCK_MODE === "refusal") {
@@ -242,4 +248,28 @@ export function loadConfig(path?: string, env: NodeJS.ProcessEnv = process.env):
   }
   if (env.PROXSHIELD_CACHE_DIR) cfg.cacheDir = env.PROXSHIELD_CACHE_DIR;
   return cfg;
+}
+
+const isLoopback = (host: string) =>
+  host === "localhost" || host === "::1" || host === "[::1]" || /^127\.\d+\.\d+\.\d+$/.test(host);
+
+/**
+ * Whether serving on `host` without client keys is safe. With a provider key on the server and no
+ * `apiKeys`, anyone who can reach the port spends that key, so that refuses to start.
+ */
+export function exposure(config: Config, host: string): { error?: string; warning?: string } {
+  if (config.apiKeys.size > 0 || isLoopback(host) || config.allowUnauthenticated) return {};
+  if (config.openaiApiKey || config.anthropicApiKey) {
+    return {
+      error:
+        `Refusing to start: listening on ${host} with a provider key on the server and no PROXSHIELD_API_KEYS, ` +
+        "so anyone who can reach this port could spend that key. Set PROXSHIELD_API_KEYS, or set " +
+        "PROXSHIELD_ALLOW_UNAUTHENTICATED=1 if something in front of proxshield already authenticates callers.",
+    };
+  }
+  return {
+    warning:
+      `No PROXSHIELD_API_KEYS set and listening on ${host}: anyone who can reach this port can use it ` +
+      "with their own provider key and the scan endpoints. Set PROXSHIELD_API_KEYS to require a key.",
+  };
 }

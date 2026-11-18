@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, it } from "vitest";
-import { actionFor, loadConfig } from "../src/config.js";
+import { actionFor, defaultConfig, exposure, loadConfig } from "../src/config.js";
 
 const file = (toml: string) => {
   const path = join(mkdtempSync(join(tmpdir(), "proxshield-")), "proxshield.toml");
@@ -61,4 +61,15 @@ it.each([
   ['[output]\npii = "block"', "output.pii"],
 ])("rejects %s", (toml, message) => {
   expect(() => loadConfig(file(toml), {})).toThrow(message);
+});
+
+it("refuses to serve a provider key on a public address without client keys", () => {
+  const withKey = defaultConfig({ openaiApiKey: "sk-server" });
+  expect(exposure(withKey, "0.0.0.0").error).toMatch(/Refusing to start/);
+  expect(exposure(withKey, "127.0.0.1")).toEqual({});
+  expect(exposure(withKey, "::1")).toEqual({});
+  expect(exposure({ ...withKey, apiKeys: new Set(["k"]) }, "0.0.0.0")).toEqual({});
+  expect(exposure({ ...withKey, allowUnauthenticated: true }, "0.0.0.0")).toEqual({});
+  expect(exposure(defaultConfig(), "0.0.0.0").warning).toMatch(/No PROXSHIELD_API_KEYS/);
+  expect(loadConfig(undefined, { PROXSHIELD_ALLOW_UNAUTHENTICATED: "1" }).allowUnauthenticated).toBe(true);
 });
