@@ -1,0 +1,14 @@
+---
+// Title with the page's description under it. The landing page draws its own hero.
+const { entry } = Astro.locals.starlightRoute;
+const isHome = entry.data.template === "splash";
+---
+
+{
+  !isHome && (
+    <div class="dl-title">
+      <h1 id="_top">{entry.data.title}</h1>
+      {entry.data.description && <p>{entry.data.description}</p>}
+    </div>
+  )
+}
