@@ -1,0 +1,527 @@
+{
+  "date": "2026-11-18",
+  "machine": "darwin-arm64, Node v22.17.1, CPU only",
+  "injection": [
+    {
+      "classifier": "prompt-guard-2",
+      "name": "deepset/prompt-injections (test)",
+      "note": "Not in the model's training data. About a third is German; the model was trained on English.",
+      "heuristics": {
+        "n": 116,
+        "tp": 1,
+        "fp": 0,
+        "tn": 56,
+        "fn": 59,
+        "recall": 0.016666666666666666,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "model": {
+        "n": 116,
+        "tp": 6,
+        "fp": 0,
+        "tn": 56,
+        "fn": 54,
+        "recall": 0.1,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "combined": {
+        "n": 116,
+        "tp": 6,
+        "fp": 0,
+        "tn": 56,
+        "fn": 54,
+        "recall": 0.1,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "msPerItem": 7.682092318965515
+    },
+    {
+      "classifier": "prompt-guard-2",
+      "name": "Lakera/gandalf_ignore_instructions (test)",
+      "note": "All injections. May overlap the model's training data (it lists 8 unnamed MIT datasets).",
+      "heuristics": {
+        "n": 112,
+        "tp": 52,
+        "fp": 0,
+        "tn": 0,
+        "fn": 60,
+        "recall": 0.4642857142857143,
+        "falsePositiveRate": null,
+        "precision": 1
+      },
+      "model": {
+        "n": 112,
+        "tp": 105,
+        "fp": 0,
+        "tn": 0,
+        "fn": 7,
+        "recall": 0.9375,
+        "falsePositiveRate": null,
+        "precision": 1
+      },
+      "combined": {
+        "n": 112,
+        "tp": 105,
+        "fp": 0,
+        "tn": 0,
+        "fn": 7,
+        "recall": 0.9375,
+        "falsePositiveRate": null,
+        "precision": 1
+      },
+      "msPerItem": 1.4678537946428574
+    },
+    {
+      "classifier": "prompt-guard-2",
+      "name": "Dolly instructions (benign)",
+      "note": "400 ordinary instructions from databricks-dolly-15k. Measures false alarms.",
+      "heuristics": {
+        "n": 400,
+        "tp": 0,
+        "fp": 0,
+        "tn": 400,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "model": {
+        "n": 400,
+        "tp": 0,
+        "fp": 0,
+        "tn": 400,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "combined": {
+        "n": 400,
+        "tp": 0,
+        "fp": 0,
+        "tn": 400,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "msPerItem": 3.444145105
+    },
+    {
+      "classifier": "prompt-guard-2",
+      "name": "Customer-support messages (benign)",
+      "note": "50 ordinary checkout, billing and support requests, including ones that use words like ignore, forget, override and act as.",
+      "heuristics": {
+        "n": 50,
+        "tp": 0,
+        "fp": 0,
+        "tn": 50,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "model": {
+        "n": 50,
+        "tp": 0,
+        "fp": 2,
+        "tn": 48,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0.04,
+        "precision": 0
+      },
+      "combined": {
+        "n": 50,
+        "tp": 0,
+        "fp": 2,
+        "tn": 48,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0.04,
+        "precision": 0
+      },
+      "msPerItem": 1.9638108399999874
+    },
+    {
+      "classifier": "prompt-guard-2",
+      "name": "Injections hidden in documents",
+      "note": "200 Dolly reference documents; 100 have a deepset (train) injection inserted mid-document. Mimics a poisoned tool result.",
+      "heuristics": {
+        "n": 200,
+        "tp": 10,
+        "fp": 0,
+        "tn": 100,
+        "fn": 90,
+        "recall": 0.1,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "model": {
+        "n": 200,
+        "tp": 22,
+        "fp": 0,
+        "tn": 100,
+        "fn": 78,
+        "recall": 0.22,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "combined": {
+        "n": 200,
+        "tp": 27,
+        "fp": 0,
+        "tn": 100,
+        "fn": 73,
+        "recall": 0.27,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "msPerItem": 198.89057708
+    },
+    {
+      "classifier": "protectai",
+      "name": "deepset/prompt-injections (test)",
+      "note": "Not in the model's training data. About a third is German; the model was trained on English.",
+      "heuristics": {
+        "n": 116,
+        "tp": 1,
+        "fp": 0,
+        "tn": 56,
+        "fn": 59,
+        "recall": 0.016666666666666666,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "model": {
+        "n": 116,
+        "tp": 20,
+        "fp": 0,
+        "tn": 56,
+        "fn": 40,
+        "recall": 0.3333333333333333,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "combined": {
+        "n": 116,
+        "tp": 20,
+        "fp": 0,
+        "tn": 56,
+        "fn": 40,
+        "recall": 0.3333333333333333,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "msPerItem": 16.78276796551723
+    },
+    {
+      "classifier": "protectai",
+      "name": "Lakera/gandalf_ignore_instructions (test)",
+      "note": "All injections. May overlap the model's training data (it lists 8 unnamed MIT datasets).",
+      "heuristics": {
+        "n": 112,
+        "tp": 52,
+        "fp": 0,
+        "tn": 0,
+        "fn": 60,
+        "recall": 0.4642857142857143,
+        "falsePositiveRate": null,
+        "precision": 1
+      },
+      "model": {
+        "n": 112,
+        "tp": 112,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "recall": 1,
+        "falsePositiveRate": null,
+        "precision": 1
+      },
+      "combined": {
+        "n": 112,
+        "tp": 112,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "recall": 1,
+        "falsePositiveRate": null,
+        "precision": 1
+      },
+      "msPerItem": 2.961678196428563
+    },
+    {
+      "classifier": "protectai",
+      "name": "Dolly instructions (benign)",
+      "note": "400 ordinary instructions from databricks-dolly-15k. Measures false alarms.",
+      "heuristics": {
+        "n": 400,
+        "tp": 0,
+        "fp": 0,
+        "tn": 400,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "model": {
+        "n": 400,
+        "tp": 0,
+        "fp": 0,
+        "tn": 400,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "combined": {
+        "n": 400,
+        "tp": 0,
+        "fp": 0,
+        "tn": 400,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "msPerItem": 7.170560312499983
+    },
+    {
+      "classifier": "protectai",
+      "name": "Customer-support messages (benign)",
+      "note": "50 ordinary checkout, billing and support requests, including ones that use words like ignore, forget, override and act as.",
+      "heuristics": {
+        "n": 50,
+        "tp": 0,
+        "fp": 0,
+        "tn": 50,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0,
+        "precision": null
+      },
+      "model": {
+        "n": 50,
+        "tp": 0,
+        "fp": 13,
+        "tn": 37,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0.26,
+        "precision": 0
+      },
+      "combined": {
+        "n": 50,
+        "tp": 0,
+        "fp": 13,
+        "tn": 37,
+        "fn": 0,
+        "recall": null,
+        "falsePositiveRate": 0.26,
+        "precision": 0
+      },
+      "msPerItem": 3.964917500000156
+    },
+    {
+      "classifier": "protectai",
+      "name": "Injections hidden in documents",
+      "note": "200 Dolly reference documents; 100 have a deepset (train) injection inserted mid-document. Mimics a poisoned tool result.",
+      "heuristics": {
+        "n": 200,
+        "tp": 10,
+        "fp": 0,
+        "tn": 100,
+        "fn": 90,
+        "recall": 0.1,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "model": {
+        "n": 200,
+        "tp": 10,
+        "fp": 0,
+        "tn": 100,
+        "fn": 90,
+        "recall": 0.1,
+        "falsePositiveRate": 0,
+        "precision": 1
+      },
+      "combined": {
+        "n": 200,
+        "tp": 51,
+        "fp": 1,
+        "tn": 99,
+        "fn": 49,
+        "recall": 0.51,
+        "falsePositiveRate": 0.01,
+        "precision": 0.9807692307692307
+      },
+      "msPerItem": 427.1773312499999
+    }
+  ],
+  "pii": [
+    {
+      "name": "Patterns only",
+      "cases": 252,
+      "values": 552,
+      "leaked": 264,
+      "redactedValues": 0.5217391304347826,
+      "falsePositives": 0,
+      "findings": 288,
+      "perEntity": {
+        "PERSON": {
+          "total": 192,
+          "caught": 0,
+          "recall": 0
+        },
+        "EMAIL": {
+          "total": 96,
+          "caught": 96,
+          "recall": 1
+        },
+        "PHONE": {
+          "total": 72,
+          "caught": 72,
+          "recall": 1
+        },
+        "CREDIT_CARD": {
+          "total": 48,
+          "caught": 48,
+          "recall": 1
+        },
+        "IBAN": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        },
+        "US_SSN": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        },
+        "ADDRESS": {
+          "total": 72,
+          "caught": 0,
+          "recall": 0
+        },
+        "IP_ADDRESS": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        }
+      },
+      "p50Ms": 0.04329199998755939,
+      "p95Ms": 0.1843339999904856
+    },
+    {
+      "name": "Patterns + BERT NER (default)",
+      "cases": 252,
+      "values": 552,
+      "leaked": 94,
+      "redactedValues": 0.8297101449275363,
+      "falsePositives": 0,
+      "findings": 458,
+      "perEntity": {
+        "PERSON": {
+          "total": 192,
+          "caught": 170,
+          "recall": 0.8854166666666666
+        },
+        "EMAIL": {
+          "total": 96,
+          "caught": 96,
+          "recall": 1
+        },
+        "PHONE": {
+          "total": 72,
+          "caught": 72,
+          "recall": 1
+        },
+        "CREDIT_CARD": {
+          "total": 48,
+          "caught": 48,
+          "recall": 1
+        },
+        "IBAN": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        },
+        "US_SSN": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        },
+        "ADDRESS": {
+          "total": 72,
+          "caught": 0,
+          "recall": 0
+        },
+        "IP_ADDRESS": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        }
+      },
+      "p50Ms": 4.967207999987295,
+      "p95Ms": 6.280957999988459
+    },
+    {
+      "name": "Patterns + OpenAI Privacy Filter",
+      "cases": 252,
+      "values": 552,
+      "leaked": 12,
+      "redactedValues": 0.9782608695652174,
+      "falsePositives": 2,
+      "findings": 548,
+      "perEntity": {
+        "PERSON": {
+          "total": 192,
+          "caught": 189,
+          "recall": 0.984375
+        },
+        "EMAIL": {
+          "total": 96,
+          "caught": 96,
+          "recall": 1
+        },
+        "PHONE": {
+          "total": 72,
+          "caught": 72,
+          "recall": 1
+        },
+        "CREDIT_CARD": {
+          "total": 48,
+          "caught": 48,
+          "recall": 1
+        },
+        "IBAN": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        },
+        "US_SSN": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        },
+        "ADDRESS": {
+          "total": 72,
+          "caught": 63,
+          "recall": 0.875
+        },
+        "IP_ADDRESS": {
+          "total": 24,
+          "caught": 24,
+          "recall": 1
+        }
+      },
+      "p50Ms": 48.10679099999834,
+      "p95Ms": 58.414916000008816
+    }
+  ]
+}
