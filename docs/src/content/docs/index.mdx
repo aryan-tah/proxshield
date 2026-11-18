@@ -1,0 +1,73 @@
+---
+title: proxshield
+description: Self-hosted firewall for LLM apps. Redacts personal data before it reaches the model, puts it back in the reply, and blocks prompt injection.
+template: splash
+editUrl: false
+lastUpdated: false
+pagefind: false
+---
+
+<div class="dl-hero">
+  <h1>Keep personal data and injected instructions out of your LLM calls</h1>
+  <p>proxshield sits between your app and OpenAI or Anthropic. Names, emails, card numbers and keys become placeholders before the model sees them and come back in the reply. Instructions hidden in a prompt or a tool result are blocked. It runs on your server, and nothing it sees leaves it.</p>
+  <div class="dl-actions">
+    <a class="dl-button primary" href="/getting-started/">Get started</a>
+    <a class="dl-button" href="/migrate/llm-guard/">Migrate from LLM Guard</a>
+    <a class="dl-button" href="https://github.com/aryan-tah/proxshield">GitHub</a>
+  </div>
+  <div class="dl-install">
+
+```bash
+docker run -p 8080:8080 ghcr.io/aryan-tah/proxshield
+```
+
+  </div>
+</div>
+
+<div class="dl-section">
+
+## Change one URL
+
+```ts
+const openai = new OpenAI({ baseURL: "http://localhost:8080/v1" });
+
+await openai.chat.completions.create({
+  model: "gpt-5",
+  messages: [{ role: "user", content: "Email Jordan Lee at jordan@acme.com about card 4111 1111 1111 1111" }],
+});
+```
+
+What OpenAI receives:
+
+```text
+Email [PERSON_1] at [EMAIL_1] about card [CREDIT_CARD_1]
+```
+
+What your app gets back has the real values in it again, including inside tool-call arguments and streamed replies.
+
+</div>
+
+<div class="dl-section">
+
+## What you get
+
+<div class="dl-features">
+  <div>
+    <h3>Redaction that round-trips</h3>
+    <p>Placeholders go out and real values come back, even when a placeholder arrives split across two streamed chunks. The model never sees the originals.</p>
+  </div>
+  <div>
+    <h3>Injection in tool results</h3>
+    <p>Retrieved pages and tool output are scored a few sentences at a time, so one planted instruction in a long document still gets caught.</p>
+  </div>
+  <div>
+    <h3>Drop-in for four APIs</h3>
+    <p>OpenAI Chat Completions, Anthropic Messages, Lakera Guard's <code>/v2/guard</code> and LLM Guard's API. Existing clients switch by URL.</p>
+  </div>
+  <div>
+    <h3>Open models, measured</h3>
+    <p>Patterns with checksums, a small NER model or OpenAI's Privacy Filter, and Meta's Prompt Guard 2. The benchmark is public and reproducible, false alarms included.</p>
+  </div>
+</div>
+
+</div>
