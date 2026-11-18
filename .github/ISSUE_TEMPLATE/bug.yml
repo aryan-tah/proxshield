@@ -1,0 +1,43 @@
+name: Bug
+description: proxshield crashed, broke a client, or returned the wrong response.
+labels: ["type: bug", "status: needs triage"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you sent, what you expected, and what you got instead.
+    validations:
+      required: true
+  - type: textarea
+    id: request
+    attributes:
+      label: Request and response
+      description: The request and the response or error. Remove API keys and any real personal data.
+      render: json
+  - type: input
+    id: version
+    attributes:
+      label: proxshield version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: endpoint
+    attributes:
+      label: Endpoint
+      options:
+        [
+          OpenAI proxy (/v1/chat/completions),
+          Anthropic proxy (/v1/messages),
+          Lakera-compatible (/v2/guard),
+          LLM Guard-compatible (/analyze,
+          /scan),
+          CLI,
+          Other,
+        ]
+  - type: dropdown
+    id: how
+    attributes:
+      label: How you run it
+      options: [Docker, pip / uv, From source, Other]

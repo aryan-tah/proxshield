@@ -1,0 +1,92 @@
+{
+  "name": "proxshield",
+  "version": "0.0.0",
+  "description": "Self-hosted firewall for LLM apps: redacts personal data before it reaches the model, restores it in the response, and blocks prompt injection. Drop-in for the OpenAI, Anthropic, Lakera Guard and LLM Guard APIs.",
+  "keywords": [
+    "llm",
+    "guardrails",
+    "prompt-injection",
+    "pii",
+    "redaction",
+    "ai-security",
+    "proxy",
+    "openai",
+    "anthropic",
+    "ai-sdk",
+    "lakera",
+    "llm-guard"
+  ],
+  "homepage": "https://proxshield.aryantah.com",
+  "bugs": "https://github.com/aryan-tah/proxshield/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aryan-tah/proxshield.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Aryan Tah (https://aryantah.com)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ai-sdk": {
+      "types": "./dist/ai-sdk.d.ts",
+      "import": "./dist/ai-sdk.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "proxshield": "./dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:models": "PROXSHIELD_TEST_MODELS=1 vitest run test/models.test.ts",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check": "npm run lint && npm run typecheck && npm test",
+    "bench": "npm run build && node bench/run.mjs"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.9",
+    "@huggingface/transformers": "4.3.2",
+    "hono": "^4.13.19",
+    "libphonenumber-js": "^1.13.16",
+    "smol-toml": "^1.9.1"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.10.0",
+    "@biomejs/biome": "2.6.7",
+    "@types/node": "^22.20.5",
+    "ai": "^7.0.176",
+    "openai": "^7.59.0",
+    "tsup": "9.0.0",
+    "typescript": "^6.0.3",
+    "vitest": "5.1.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "peerDependencies": {
+    "@ai-sdk/provider": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@ai-sdk/provider": {
+      "optional": true
+    }
+  }
+}

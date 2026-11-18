@@ -1,0 +1,19 @@
+name: Feature or integration
+description: Suggest a detector, a provider, a framework integration or a policy option.
+labels: ["type: feature", "status: needs triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What can't you do today? Which app, framework or provider are you protecting?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you'd like
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do today instead

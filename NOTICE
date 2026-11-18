@@ -1,0 +1,21 @@
+proxshield
+Copyright 2026 Aryan Tah
+
+This product is not affiliated with, endorsed by, or connected to Lakera, Check Point,
+Protect AI, Palo Alto Networks, Meta, OpenAI or Anthropic. Their product names are used only
+to describe the APIs and models this software works with.
+
+proxshield downloads and runs third-party models at runtime. They are not part of the npm
+package; the Docker image includes copies of the default models. Each keeps its own license:
+
+- Llama Prompt Guard 2 22M (default injection model), Llama 4 Community License.
+  Built with Llama. Llama 4 is licensed under the Llama 4 Community License,
+  Copyright (c) Meta Platforms, Inc. All Rights Reserved.
+  https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-22M
+  ONNX build: https://huggingface.co/gravitee-io/Llama-Prompt-Guard-2-22M-onnx
+- protectai/deberta-v3-base-prompt-injection-v2 (optional), Apache-2.0
+  https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2
+- Xenova/bert-base-NER (default PII model), MIT, an ONNX build of dslim/bert-base-NER
+  https://huggingface.co/Xenova/bert-base-NER
+- openai/privacy-filter (optional), Apache-2.0
+  https://huggingface.co/openai/privacy-filter

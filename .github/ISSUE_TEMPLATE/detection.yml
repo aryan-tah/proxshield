@@ -1,0 +1,34 @@
+name: Missed or wrong detection
+description: proxshield missed personal data or an injection, or flagged something harmless.
+labels: ["type: bug", "area: detection", "status: needs triage"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What went wrong
+      options:
+        - Missed personal data (false negative)
+        - Flagged harmless text as personal data (false positive)
+        - Missed a prompt injection (false negative)
+        - Flagged a harmless prompt as an injection (false positive)
+        - Restored the wrong value into a response
+    validations:
+      required: true
+  - type: textarea
+    id: text
+    attributes:
+      label: The text
+      description: Replace real personal data with realistic fake values that trigger the same behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: What proxshield returned
+      description: The output of `proxshield scan "<text>" --json`, if you can run it.
+      render: json
+  - type: input
+    id: version
+    attributes:
+      label: proxshield version
+      placeholder: "0.1.0"

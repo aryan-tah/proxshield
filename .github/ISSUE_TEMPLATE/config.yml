@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/aryan-tah/proxshield/discussions
+    about: Ask a question or float an idea in Discussions.
+  - name: Security vulnerability
+    url: https://github.com/aryan-tah/proxshield/security/advisories/new
+    about: Report security problems privately.
