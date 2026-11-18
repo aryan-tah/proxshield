@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:22-bookworm-slim AS build
+FROM node:26-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
@@ -11,7 +11,7 @@ ENV PROXSHIELD_CACHE_DIR=/models
 RUN node dist/bin.js download \
  && node -e "fetch('https://huggingface.co/gravitee-io/Llama-Prompt-Guard-2-22M-onnx/resolve/main/LICENSE').then(r=>r.text()).then(t=>require('fs').writeFileSync('/models/LICENSE-llama4.txt',t))"
 
-FROM node:22-bookworm-slim
+FROM node:26-bookworm-slim
 LABEL org.opencontainers.image.title="proxshield" \
       org.opencontainers.image.description="Self-hosted firewall for LLM apps: PII redaction and prompt-injection blocking" \
       org.opencontainers.image.source="https://github.com/aryan-tah/proxshield" \
