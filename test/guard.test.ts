@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { DEFAULT_ENTITIES } from "../src/config.js";
-import { counts, injectionScore } from "../src/guard.js";
+import { counts, injectionScore, OutputStream, segmentEnd } from "../src/guard.js";
 import { Vault } from "../src/vault.js";
 import { fakeGuard } from "./helpers.js";
 
@@ -109,4 +109,20 @@ it("splits long text into sentence chunks", async () => {
   expect(chunks.length).toBeGreaterThan(3);
   expect(chunks.join(" ")).toBe(text);
   expect(sentenceChunks(text, 0)).toEqual([]);
+});
+
+it("cuts streamed text only where a sentence ends, or at a space once it's long", () => {
+  expect(segmentEnd("Hi there. More", 400)).toBe(10);
+  expect(segmentEnd("mail ceo@bigco.com", 400)).toBe(0);
+  expect(segmentEnd("a b c d", 4)).toBe(6);
+  expect(segmentEnd("abcdef", 4)).toBe(6);
+});
+
+it("masks a value split across stream chunks", async () => {
+  const g = fakeGuard();
+  const v = new Vault();
+  await g.inspect([{ role: "user", text: "I'm John" }], v);
+  const s = new OutputStream(g, v);
+  const out = [await s.feed("Hi [PERSON_1]. Mail bob@oth"), await s.feed("er.org. Bye"), await s.finish()];
+  expect(out).toEqual(["Hi John. ", "Mail [EMAIL_1]. ", "Bye"]);
 });

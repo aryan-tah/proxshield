@@ -12,7 +12,7 @@ import type {
   LanguageModelV4StreamPart,
 } from "@ai-sdk/provider";
 import { type Config, defaultConfig } from "./config.js";
-import { createGuard, type Guard, type Inspection } from "./guard.js";
+import { createGuard, type Guard, type Inspection, OutputStream } from "./guard.js";
 import { isRecord, type Slot, setter } from "./proxy/common.js";
 import { jsonStringEscape, StreamRestorer, Vault } from "./vault.js";
 
@@ -136,27 +136,37 @@ export function proxshieldMiddleware(options: MiddlewareOptions = {}): LanguageM
       const result = await doStream();
       const vault = vaults.get(params);
       if (!vault) return result;
-      const text = new Map<string, StreamRestorer>();
+      const text = new Map<string, OutputStream>();
       const tool = new Map<string, StreamRestorer>();
-      const restorer = (map: Map<string, StreamRestorer>, id: string, json: boolean) => {
-        let r = map.get(id);
+      const restorer = (id: string) => {
+        let r = tool.get(id);
         if (!r) {
-          r = new StreamRestorer(vault, json ? jsonStringEscape : undefined);
-          map.set(id, r);
+          r = new StreamRestorer(vault, jsonStringEscape);
+          tool.set(id, r);
+        }
+        return r;
+      };
+      const masker = (id: string) => {
+        let r = text.get(id);
+        if (!r) {
+          r = new OutputStream(guard, vault);
+          text.set(id, r);
         }
         return r;
       };
       const stream = result.stream.pipeThrough(
         new TransformStream<LanguageModelV4StreamPart, LanguageModelV4StreamPart>({
-          transform(part, controller) {
+          async transform(part, controller) {
             if (part.type === "text-delta") {
-              controller.enqueue({ ...part, delta: restorer(text, part.id, false).feed(part.delta) });
+              const delta = await masker(part.id).feed(part.delta);
+              if (delta) controller.enqueue({ ...part, delta });
             } else if (part.type === "text-end") {
-              const rest = text.get(part.id)?.finish();
+              const rest = await text.get(part.id)?.finish();
+              text.delete(part.id);
               if (rest) controller.enqueue({ type: "text-delta", id: part.id, delta: rest });
               controller.enqueue(part);
             } else if (part.type === "tool-input-delta") {
-              controller.enqueue({ ...part, delta: restorer(tool, part.id, true).feed(part.delta) });
+              controller.enqueue({ ...part, delta: restorer(part.id).feed(part.delta) });
             } else if (part.type === "tool-input-end") {
               const rest = tool.get(part.id)?.finish();
               if (rest) controller.enqueue({ type: "tool-input-delta", id: part.id, delta: rest });

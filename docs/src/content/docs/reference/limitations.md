@@ -18,7 +18,7 @@ proxshield reduces what reaches a model provider and blocks the most common inje
 
 - OpenAI Chat Completions and Anthropic Messages only. Not yet: the OpenAI Responses API, embeddings, Realtime, Gemini, Bedrock.
 - Images, audio, PDFs and other files pass through unscanned.
-- Personal data in streamed replies isn't masked (values from the request are still restored).
+- A value the model splits across a very long sentence (over 400 characters with no full stop) can be cut in two and missed in a streamed reply.
 - Tool definitions aren't screened.
 
 ## Operations

@@ -208,6 +208,48 @@ it("masks new personal data in the reply", async () => {
   expect(body.choices[0]?.message.content).toBe("Contact the CEO at [EMAIL_1]");
 });
 
+function streamedContent(raw: string): string {
+  return raw
+    .split("\n")
+    .filter((l) => l.startsWith("data: {"))
+    .map(
+      (l) =>
+        (JSON.parse(l.slice(6)) as { choices: { delta: { content?: string } }[] }).choices[0]?.delta
+          .content ?? "",
+    )
+    .join("");
+}
+
+it("masks new personal data in a streamed reply, even split across chunks", async () => {
+  const { upstream, post } = setup();
+  upstream.respond = () =>
+    sse(
+      chunk({ role: "assistant", content: "" }),
+      chunk({ content: "Hi [PERSON_1]. The CEO is at ceo@big" }),
+      chunk({ content: "co.com. Anything else?" }),
+      chunk({}, "stop"),
+      "data: [DONE]\n\n",
+    );
+  const r = await post("/v1/chat/completions", {
+    model: "m",
+    stream: true,
+    messages: [{ role: "user", content: "I'm John" }],
+  });
+  expect(streamedContent(await r.text())).toBe("Hi John. The CEO is at [EMAIL_1]. Anything else?");
+});
+
+it("streams replies unscanned when output masking is off", async () => {
+  const { upstream, post } = setup({ outputPii: "allow" });
+  upstream.respond = () =>
+    sse(chunk({ content: "Mail ceo@bigco.com" }), chunk({}, "stop"), "data: [DONE]\n\n");
+  const r = await post("/v1/chat/completions", {
+    model: "m",
+    stream: true,
+    messages: [{ role: "user", content: "hi" }],
+  });
+  expect(streamedContent(await r.text())).toBe("Mail ceo@bigco.com");
+});
+
 it("rejects bad bodies and unknown routes", async () => {
   const { post, call, upstream } = setup();
   expect((await post("/v1/chat/completions", "not json")).status).toBe(400);

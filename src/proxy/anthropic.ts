@@ -4,7 +4,7 @@
  */
 import { randomUUID } from "node:crypto";
 import type { Context, Hono } from "hono";
-import type { Inspection } from "../guard.js";
+import { type Guard, type Inspection, OutputStream } from "../guard.js";
 import { jsonStringEscape, StreamRestorer, Vault } from "../vault.js";
 import {
   bearer,
@@ -119,26 +119,32 @@ function refusal(deps: Deps, body: Json, inspection: Inspection): Response {
   return new Response(events.join(""), { headers: { ...headers, "content-type": "text/event-stream" } });
 }
 
-/** Restores placeholders in a Messages API SSE stream. */
+/** Restores placeholders in a Messages API SSE stream, and masks new personal data in its text. */
 export class StreamTransformer {
-  private readonly restorers = new Map<number, { kind: string; r: StreamRestorer }>();
+  private readonly open = new Map<
+    number,
+    { kind: string; feed(t: string): Promise<string> | string; finish(): Promise<string> | string }
+  >();
 
-  constructor(private readonly vault: Vault) {}
+  constructor(
+    private readonly vault: Vault,
+    private readonly guard: Guard,
+  ) {}
 
-  event(data: Json): Json[] {
+  async event(data: Json): Promise<Json[]> {
     const index = Number(data.index ?? 0);
     if (data.type === "content_block_delta" && isRecord(data.delta)) {
       const delta = data.delta;
       if (delta.type === "text_delta" && typeof delta.text === "string") {
-        delta.text = this.get(index, "text_delta").feed(delta.text);
+        delta.text = await this.get(index, "text_delta").feed(delta.text);
       } else if (delta.type === "input_json_delta" && typeof delta.partial_json === "string") {
-        delta.partial_json = this.get(index, "input_json_delta").feed(delta.partial_json);
+        delta.partial_json = await this.get(index, "input_json_delta").feed(delta.partial_json);
       }
     } else if (data.type === "content_block_stop") {
-      const held = this.restorers.get(index);
+      const held = this.open.get(index);
       if (held) {
-        this.restorers.delete(index);
-        const rest = held.r.finish();
+        this.open.delete(index);
+        const rest = await held.finish();
         if (rest) {
           const field = held.kind === "text_delta" ? "text" : "partial_json";
           return [{ type: "content_block_delta", index, delta: { type: held.kind, [field]: rest } }, data];
@@ -148,19 +154,26 @@ export class StreamTransformer {
     return [data];
   }
 
-  private get(index: number, kind: string): StreamRestorer {
-    let held = this.restorers.get(index);
+  private get(index: number, kind: string) {
+    let held = this.open.get(index);
     if (!held) {
-      const r = new StreamRestorer(this.vault, kind === "input_json_delta" ? jsonStringEscape : undefined);
-      held = { kind, r };
-      this.restorers.set(index, held);
+      const r =
+        kind === "text_delta"
+          ? new OutputStream(this.guard, this.vault)
+          : new StreamRestorer(this.vault, jsonStringEscape);
+      held = { kind, feed: (t) => r.feed(t), finish: () => r.finish() };
+      this.open.set(index, held);
     }
-    return held.r;
+    return held;
   }
 }
 
-async function* streamEvents(body: ReadableStream<Uint8Array>, vault: Vault): AsyncGenerator<string> {
-  const t = new StreamTransformer(vault);
+async function* streamEvents(
+  body: ReadableStream<Uint8Array>,
+  vault: Vault,
+  guard: Guard,
+): AsyncGenerator<string> {
+  const t = new StreamTransformer(vault, guard);
   let name: string | null = null;
   for await (const line of lines(body)) {
     if (line.startsWith("event:")) {
@@ -178,7 +191,7 @@ async function* streamEvents(body: ReadableStream<Uint8Array>, vault: Vault): As
       yield `${name ? `event: ${name}\n` : ""}${line}\n\n`;
       continue;
     }
-    for (const out of t.event(data)) {
+    for (const out of await t.event(data)) {
       yield `event: ${String(out.type ?? name)}\ndata: ${JSON.stringify(out)}\n\n`;
     }
     name = null;
@@ -255,7 +268,10 @@ async function guarded(
     return new Response(JSON.stringify(data), { status: upstream.status, headers });
   }
   log("streamed", inspection, upstream.status);
-  return new Response(streamOf(streamEvents(upstream.body, vault)), { status: upstream.status, headers });
+  return new Response(streamOf(streamEvents(upstream.body, vault, deps.guard)), {
+    status: upstream.status,
+    headers,
+  });
 }
 
 export function anthropicRoutes(app: Hono, deps: Deps): void {
