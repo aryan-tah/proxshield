@@ -94,6 +94,8 @@ docker run -p 8080:8080 \
 
 The [Lakera](/migrate/lakera/) and [LLM Guard](/migrate/llm-guard/) endpoints check `PROXSHIELD_API_KEYS` as a bearer token.
 
+With a provider key on the server, `PROXSHIELD_API_KEYS` is required whenever proxshield listens on anything other than localhost (the Docker image listens on `0.0.0.0`). Without it, anyone who can reach the port would spend your key, so proxshield refuses to start. If a gateway in front of proxshield already authenticates callers, set `PROXSHIELD_ALLOW_UNAUTHENTICATED=1` (or `[server] allow_unauthenticated = true`). In pass-through mode it starts with a warning instead, since callers bring their own provider key.
+
 ## Environment variables
 
 | Variable | Meaning |
@@ -101,6 +103,7 @@ The [Lakera](/migrate/lakera/) and [LLM Guard](/migrate/llm-guard/) endpoints ch
 | `PROXSHIELD_CONFIG` | Path to the TOML file |
 | `PROXSHIELD_API_KEYS` | Comma-separated keys clients use for proxshield |
 | `PROXSHIELD_OPENAI_API_KEY`, `PROXSHIELD_ANTHROPIC_API_KEY` | Keep provider keys on the server |
+| `PROXSHIELD_ALLOW_UNAUTHENTICATED` | `1` starts without `PROXSHIELD_API_KEYS` on a public address even with a provider key on the server |
 | `PROXSHIELD_OPENAI_BASE_URL`, `PROXSHIELD_ANTHROPIC_BASE_URL` | Where to forward requests |
 | `PROXSHIELD_PII_MODEL` | `bert`, `privacy-filter` or `none` |
 | `PROXSHIELD_INJECTION_MODEL` | `prompt-guard-2` or `protectai` |

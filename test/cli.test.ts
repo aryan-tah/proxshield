@@ -37,3 +37,14 @@ it("exits 2 on a bad config", async () => {
   const t = io();
   expect(await main(["scan", "--config", "/does/not/exist.toml", "hi"], t.io)).toBe(2);
 });
+
+it("won't serve a server-side provider key to anyone on a public address", async () => {
+  const t = io();
+  process.env.PROXSHIELD_OPENAI_API_KEY = "sk-server";
+  try {
+    expect(await main(["serve", "--host", "0.0.0.0", "--port", "0"], t.io)).toBe(1);
+  } finally {
+    delete process.env.PROXSHIELD_OPENAI_API_KEY;
+  }
+  expect(t.err.join("\n")).toMatch(/PROXSHIELD_API_KEYS/);
+});

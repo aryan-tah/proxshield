@@ -1,6 +1,6 @@
 /** Command line: `proxshield serve`, `proxshield scan` and `proxshield download`. */
 import { parseArgs } from "node:util";
-import { actionFor, type Config, loadConfig } from "./config.js";
+import { actionFor, type Config, exposure, loadConfig } from "./config.js";
 import { bertNer, privacyFilter, TransformersInjection } from "./detectors/models.js";
 import { createGuard } from "./guard.js";
 import { Vault } from "./vault.js";
@@ -34,6 +34,12 @@ const defaultIo: Io = {
 };
 
 async function serve(config: Config, host: string, port: number, io: Io): Promise<number> {
+  const { error, warning } = exposure(config, host);
+  if (error) {
+    io.err(`proxshield: ${error}`);
+    return 1;
+  }
+  if (warning) io.err(`proxshield: warning: ${warning}`);
   const { serve: listen } = await import("@hono/node-server");
   const { createApp } = await import("./app.js");
   const { app, ready } = createApp({ config });
