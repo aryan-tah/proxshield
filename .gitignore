@@ -1,0 +1,8 @@
+dist/
+.DS_Store
+docs/node_modules/
+docs/dist/
+docs/.astro/
+bench/data/
+proxshield.local.toml
+node_modules/
