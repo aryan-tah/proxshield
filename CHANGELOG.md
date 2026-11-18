@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/aryan-tah/proxshield/compare/v0.1.0...v0.1.1) (2026-11-18)
+
+
+### Bug fixes
+
+* keep the proxshield command in the published package ([#33](https://github.com/aryan-tah/proxshield/issues/33)) ([cbc9247](https://github.com/aryan-tah/proxshield/commit/cbc924700ae42a4aea3cbff80b8a27ce65b59495))
+
 ## 0.1.0 (2026-11-18)
 
 

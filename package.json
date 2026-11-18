@@ -1,6 +1,6 @@
 {
   "name": "proxshield",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Self-hosted firewall for LLM apps: redacts personal data before it reaches the model, restores it in the response, and blocks prompt injection. Drop-in for the OpenAI, Anthropic, Lakera Guard and LLM Guard APIs.",
   "keywords": [
     "llm",
