@@ -32,7 +32,7 @@ The first start downloads about 0.9 GB.
 | --- | --- | --- |
 | Size | 110 MB | 0.9 GB |
 | Finds | people, places, organizations | people, addresses, emails, phones, dates, URLs, account numbers, secrets |
-| Values redacted in the benchmark | 83.0% | 97.8% |
+| Values redacted in the benchmark | 100% | 99.5% |
 | Time per message (p50, M4 Pro CPU) | 5 ms | 48 ms |
 
 Patterns run in both cases, so structured data like cards and emails is caught either way.

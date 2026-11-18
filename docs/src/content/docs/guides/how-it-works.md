@@ -23,7 +23,7 @@ Three kinds of detector look at each piece.
 | Emails | Domain shape |
 | Secrets | Published key formats (OpenAI, Anthropic, AWS, GitHub, Stripe, Slack, Google and more), private key blocks, JWTs, passwords in connection strings, and `password=` style assignments with enough randomness |
 
-**A model for names and places.** Patterns can't find "Jordan Lee", so a small token-classification model runs too. The default is BERT NER (110 MB), which finds people, places and organizations. [OpenAI Privacy Filter](https://huggingface.co/openai/privacy-filter) is the alternative (0.9 GB). It also finds street addresses, dates and account numbers, and it redacted 97.8% of values in the [benchmark](/reference/benchmark/) against 83% for the default.
+**A model for names and places.** Patterns can't find "Jordan Lee", so a small token-classification model runs too. The default is BERT NER (110 MB), which finds people, places and organizations. [OpenAI Privacy Filter](https://huggingface.co/openai/privacy-filter) is the alternative (0.9 GB). It also finds non-US addresses, dates and account numbers. On the synthetic [benchmark](/reference/benchmark/) both setups redact nearly everything, so choose Privacy Filter for messier real-world text, not for the score.
 
 **Prompt-injection detection** combines two things:
 

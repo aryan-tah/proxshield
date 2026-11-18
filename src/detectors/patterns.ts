@@ -17,6 +17,20 @@ const IBAN = /\b([A-Z]{2}\d{2}(?: ?[A-Z0-9]){11,30})\b/g;
 const IPV4 = /(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])/g;
 const IPV6 = /(?<![\w:])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![\w:])/g;
 
+// A US-style street address: house number, capitalized street name, a street type, then an
+// optional unit and an optional ", City[, ST] [ZIP]" that has to end the clause, so a following
+// capitalized word ("..., Call me") isn't swallowed as a city.
+const STREET_TYPES =
+  "Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Place|Pl|Terrace|Ter|Way|" +
+  "Circle|Cir|Parkway|Pkwy|Highway|Hwy|Square|Sq|Trail|Trl|Plaza|Plz|Loop|Row|Alley|Crescent";
+const ADDRESS = new RegExp(
+  String.raw`(?<![\w-])\d{1,6}[A-Z]?\s+(?:(?:N|S|E|W|North|South|East|West)\.?\s+)?` +
+    String.raw`(?:[A-Z][a-z]+\s+){1,4}(?:${STREET_TYPES})(?:\.(?=,))?(?:\s+(?:NE|NW|SE|SW|N|S|E|W)\b)?(?!\w)` +
+    String.raw`(?:,?\s+(?:Apt|Apartment|Suite|Ste|Unit|#)\.?\s*[\w-]+)?` +
+    String.raw`(?:,\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}(?:,\s+[A-Z]{2})?(?:\s+\d{5}(?:-\d{4})?)?(?=\s*(?:[.,;:!?)\n]|$)))?`,
+  "g",
+);
+
 // biome-ignore format: a table reads better on few lines
 const IBAN_LENGTHS: Record<string, number> = {
   AD: 24, AE: 23, AT: 20, BE: 16, BG: 22, BH: 22, BR: 29, CH: 21, CY: 28, CZ: 24, DE: 22, DK: 18,
@@ -124,6 +138,16 @@ export function* findPatterns(text: string, phoneRegion = "US"): Generator<Findi
         detector: "pattern",
       };
     }
+  }
+  for (const m of text.matchAll(ADDRESS)) {
+    yield {
+      entity: "ADDRESS",
+      start: m.index,
+      end: m.index + m[0].length,
+      text: m[0],
+      score: 0.85,
+      detector: "pattern",
+    };
   }
   let phones: ReturnType<typeof findPhoneNumbersInText> = [];
   try {

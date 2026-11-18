@@ -130,3 +130,39 @@ it("merges WordPiece continuations into one word", async () => {
     { label: "I-PER", score: 0.98, start: 9, end: 15 },
   ]);
 });
+
+describe("street addresses", () => {
+  const addresses = (text: string) =>
+    [...findPatterns(text)].filter((f) => f.entity === "ADDRESS").map((f) => f.text);
+
+  it("finds a street address with its unit, city, state and ZIP", () => {
+    expect(addresses("Ship to 742 Evergreen Terrace, Springfield. Call first.")).toEqual([
+      "742 Evergreen Terrace, Springfield",
+    ]);
+    expect(addresses("Unit at 55 W Elm St, Apt 4B, Chicago, IL 60610")).toEqual([
+      "55 W Elm St, Apt 4B, Chicago, IL 60610",
+    ]);
+    expect(addresses("Office: 1600 Pennsylvania Ave NW, Washington, DC 20500.")).toEqual([
+      "1600 Pennsylvania Ave NW, Washington, DC 20500",
+    ]);
+    expect(addresses("Meet at 15 Martin Luther King Jr Blvd.")).toEqual(["15 Martin Luther King Jr Blvd"]);
+  });
+
+  it("doesn't take the next sentence's first word as a city", () => {
+    expect(addresses("moved to 17 Willow Court, Brookhaven, Call me")).toEqual([
+      "17 Willow Court, Brookhaven",
+    ]);
+  });
+
+  it("leaves numbers followed by ordinary capitalized words alone", () => {
+    for (const text of [
+      "We sold 300 Blue Widgets at the Main Event.",
+      "Exit 42 Highway closures are expected.",
+      "Step 3 Drive the car to the dealer.",
+      "Chapter 12 Way Forward explains the plan.",
+      "I live on Main Street.",
+    ]) {
+      expect(addresses(text), text).toEqual([]);
+    }
+  });
+});
