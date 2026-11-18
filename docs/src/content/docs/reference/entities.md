@@ -24,7 +24,7 @@ It isn't restored inside a longer token (`EMAIL_10` isn't `EMAIL_1`).
 
 ## Personal data in replies
 
-Before restoring, proxshield scans the reply for personal data that wasn't in the request and masks it with a fresh, unrestorable placeholder (`[EMAIL_2]`). Values from the request aren't affected, because the model only ever saw their placeholders. Set `[output] pii = "allow"` to turn this off. Streamed replies aren't scanned this way yet.
+Before restoring, proxshield scans the reply for personal data that wasn't in the request and masks it with a fresh, unrestorable placeholder (`[EMAIL_2]`). Values from the request aren't affected, because the model only ever saw their placeholders. Set `[output] pii = "allow"` to turn this off. Streamed replies are scanned a sentence at a time, so text arrives in sentence-sized pieces instead of token by token; with `pii = "allow"` streams pass through as they arrive.
 
 ## Scope
 

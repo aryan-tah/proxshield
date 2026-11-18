@@ -95,6 +95,30 @@ it("restores streamed text and tool input", async () => {
   expect(final.content[1]).toMatchObject({ input: { to: "bob@x.io" } });
 });
 
+it("masks new personal data in streamed text", async () => {
+  const { upstream, sdkFetch } = setup();
+  const event = (type: string, data: Record<string, unknown>) =>
+    `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
+  upstream.respond = () =>
+    sse(
+      event("message_start", { message: { ...message([]), stop_reason: null } }),
+      event("content_block_start", { index: 0, content_block: { type: "text", text: "" } }),
+      event("content_block_delta", { index: 0, delta: { type: "text_delta", text: "Sure. Write to ceo@" } }),
+      event("content_block_delta", { index: 0, delta: { type: "text_delta", text: "bigco.com today." } }),
+      event("content_block_stop", { index: 0 }),
+      event("message_delta", {
+        delta: { stop_reason: "end_turn", stop_sequence: null },
+        usage: { output_tokens: 5 },
+      }),
+      event("message_stop", {}),
+    );
+  const client = new Anthropic({ apiKey: "k", baseURL: "http://proxshield.test", fetch: sdkFetch });
+  const final = await client.messages
+    .stream({ model: "m", max_tokens: 10, messages: [{ role: "user", content: "who?" }] })
+    .finalMessage();
+  expect(final.content[0]).toMatchObject({ text: "Sure. Write to [EMAIL_1] today." });
+});
+
 it("blocks injection in a tool result", async () => {
   const { upstream, post } = setup();
   const r = await post("/v1/messages", {

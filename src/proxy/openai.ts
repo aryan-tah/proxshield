@@ -5,7 +5,7 @@
  */
 import { randomUUID } from "node:crypto";
 import type { Context, Hono } from "hono";
-import type { Inspection } from "../guard.js";
+import { type Guard, type Inspection, OutputStream } from "../guard.js";
 import { jsonStringEscape, StreamRestorer, Vault } from "../vault.js";
 import {
   bearer,
@@ -119,11 +119,14 @@ function refusal(deps: Deps, body: Json, inspection: Inspection): Response {
 
 /** Restores placeholders in a Chat Completions SSE stream. */
 export class StreamTransformer {
-  private readonly text = new Map<number, StreamRestorer>();
+  private readonly text = new Map<number, OutputStream>();
   private readonly args = new Map<string, StreamRestorer>();
   private template: Json | null = null;
 
-  constructor(private readonly vault: Vault) {}
+  constructor(
+    private readonly vault: Vault,
+    private readonly guard: Guard,
+  ) {}
 
   private chunkFor(index: number, delta: Json): Json {
     const chunk: Json = structuredClone(this.template ?? {});
@@ -133,24 +136,26 @@ export class StreamTransformer {
   }
 
   /** Chunks carrying text still held back, for one choice (or all of them). */
-  private flush(index: number | null): Json[] {
+  private async flush(index: number | null): Promise<Json[]> {
     if (this.template === null) return [];
     const out: Json[] = [];
     for (const [i, r] of this.text) {
       if (index !== null && i !== index) continue;
-      const rest = r.finish();
+      this.text.delete(i);
+      const rest = await r.finish();
       if (rest) out.push(this.chunkFor(i, { content: rest }));
     }
     for (const [key, r] of this.args) {
       const [i, t] = key.split(":").map(Number) as [number, number];
       if (index !== null && i !== index) continue;
+      this.args.delete(key);
       const rest = r.finish();
       if (rest) out.push(this.chunkFor(i, { tool_calls: [{ index: t, function: { arguments: rest } }] }));
     }
     return out;
   }
 
-  chunk(data: Json): Json[] {
+  async chunk(data: Json): Promise<Json[]> {
     const choices = Array.isArray(data.choices) ? data.choices : [];
     if (this.template === null && choices.length) {
       const { choices: _, ...rest } = data;
@@ -162,9 +167,9 @@ export class StreamTransformer {
       const index = Number(choice.index ?? 0);
       const delta = isRecord(choice.delta) ? choice.delta : {};
       if (typeof delta.content === "string") {
-        const r = this.text.get(index) ?? new StreamRestorer(this.vault);
+        const r = this.text.get(index) ?? new OutputStream(this.guard, this.vault);
         this.text.set(index, r);
-        delta.content = r.feed(delta.content);
+        delta.content = await r.feed(delta.content);
       }
       for (const call of Array.isArray(delta.tool_calls) ? delta.tool_calls : []) {
         const fn = isRecord(call) ? call.function : null;
@@ -175,18 +180,22 @@ export class StreamTransformer {
           fn.arguments = r.feed(fn.arguments);
         }
       }
-      if (choice.finish_reason) before.push(...this.flush(index));
+      if (choice.finish_reason) before.push(...(await this.flush(index)));
     }
     return [...before, data];
   }
 
-  done(): Json[] {
+  done(): Promise<Json[]> {
     return this.flush(null);
   }
 }
 
-async function* streamEvents(body: ReadableStream<Uint8Array>, vault: Vault): AsyncGenerator<string> {
-  const t = new StreamTransformer(vault);
+async function* streamEvents(
+  body: ReadableStream<Uint8Array>,
+  vault: Vault,
+  guard: Guard,
+): AsyncGenerator<string> {
+  const t = new StreamTransformer(vault, guard);
   const emit = (chunk: Json) => `data: ${JSON.stringify(chunk)}\n\n`;
   for await (const line of lines(body)) {
     if (!line.startsWith("data:")) {
@@ -195,7 +204,7 @@ async function* streamEvents(body: ReadableStream<Uint8Array>, vault: Vault): As
     }
     const payload = line.slice(5).trim();
     if (payload === "[DONE]") {
-      for (const c of t.done()) yield emit(c);
+      for (const c of await t.done()) yield emit(c);
       yield "data: [DONE]\n\n";
       continue;
     }
@@ -206,9 +215,9 @@ async function* streamEvents(body: ReadableStream<Uint8Array>, vault: Vault): As
       yield `${line}\n\n`;
       continue;
     }
-    for (const c of t.chunk(data)) yield emit(c);
+    for (const c of await t.chunk(data)) yield emit(c);
   }
-  for (const c of t.done()) yield emit(c); // streams that end without [DONE]
+  for (const c of await t.done()) yield emit(c); // streams that end without [DONE]
 }
 
 function authorized(deps: Deps, c: Context): boolean {
@@ -276,7 +285,10 @@ async function chatCompletions(deps: Deps, c: Context): Promise<Response> {
     return new Response(JSON.stringify(data), { status: upstream.status, headers });
   }
   log("streamed", inspection, upstream.status);
-  return new Response(streamOf(streamEvents(upstream.body, vault)), { status: upstream.status, headers });
+  return new Response(streamOf(streamEvents(upstream.body, vault, deps.guard)), {
+    status: upstream.status,
+    headers,
+  });
 }
 
 async function models(deps: Deps, c: Context): Promise<Response> {

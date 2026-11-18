@@ -15,7 +15,7 @@ import {
 } from "./detectors/models.js";
 import { findPatterns } from "./detectors/patterns.js";
 import { findSecrets } from "./detectors/secrets.js";
-import { Vault } from "./vault.js";
+import { type Escape, StreamRestorer, Vault } from "./vault.js";
 
 /**
  * One piece of text from a request, with the role it came from. Roles: `system`, `user`,
@@ -246,4 +246,57 @@ export function createGuard(config: Config, opts: ModelOptions = {}): Guard {
         ? new NoPii()
         : bertNer(options);
   return new Guard(config, new TransformersInjection(options, config.injectionModel), pii);
+}
+
+/** Where `text` can be cut so no sentence is split: after the last sentence end, or at a space once it's long. */
+export function segmentEnd(text: string, maxChars: number): number {
+  let end = 0;
+  for (const m of text.matchAll(/[.!?。！？\n]+\s/g)) end = m.index + m[0].length;
+  if (end > 0 || text.length < maxChars) return end;
+  const space = text.lastIndexOf(" ");
+  return space > 0 ? space + 1 : text.length;
+}
+
+/**
+ * Masks new personal data in streamed text, then restores placeholders. Text is held until a
+ * sentence ends (or `maxChars` pile up) so a value isn't split across two scans. With
+ * `output.pii = "allow"` nothing is held beyond what placeholder restoration needs.
+ */
+export class OutputStream {
+  private pending = "";
+  private readonly restorer: StreamRestorer;
+
+  constructor(
+    private readonly guard: Guard,
+    private readonly vault: Vault,
+    escapeValue?: Escape,
+    private readonly maxChars = 400,
+  ) {
+    this.restorer = new StreamRestorer(vault, escapeValue);
+  }
+
+  private get masks(): boolean {
+    return this.guard.config.outputPii !== "allow";
+  }
+
+  async feed(chunk: string): Promise<string> {
+    if (!this.masks) return this.restorer.feed(chunk);
+    this.pending += chunk;
+    const end = segmentEnd(this.pending, this.maxChars);
+    if (end === 0) return "";
+    const segment = this.pending.slice(0, end);
+    this.pending = this.pending.slice(end);
+    const { text } = await this.guard.scanOutput(segment, this.vault);
+    return this.restorer.feed(text);
+  }
+
+  async finish(): Promise<string> {
+    let out = "";
+    if (this.pending) {
+      const { text } = await this.guard.scanOutput(this.pending, this.vault);
+      this.pending = "";
+      out = this.restorer.feed(text);
+    }
+    return out + this.restorer.finish();
+  }
 }

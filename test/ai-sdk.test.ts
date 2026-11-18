@@ -56,6 +56,25 @@ it("restores streamed text split across deltas", async () => {
   expect(await result.text).toBe("Booked for Priya Patel at Riverside");
 });
 
+it("masks new personal data in streamed text", async () => {
+  const model = new MockLanguageModelV4({
+    doStream: async () => ({
+      stream: simulateReadableStream({
+        chunks: [
+          { type: "text-start", id: "1" },
+          { type: "text-delta", id: "1", delta: "Done. Copied ceo@big" },
+          { type: "text-delta", id: "1", delta: "co.com on it" },
+          { type: "text-end", id: "1" },
+          { type: "finish", finishReason: { unified: "stop", raw: "stop" }, usage },
+        ],
+      }),
+    }),
+  });
+  const wrapped = wrapLanguageModel({ model, middleware: proxshieldMiddleware({ guard: fakeGuard() }) });
+  const result = streamText({ model: wrapped, prompt: "Send it" });
+  expect(await result.text).toBe("Done. Copied [EMAIL_1] on it");
+});
+
 it("throws before calling the model when a prompt is an injection", async () => {
   let called = false;
   const model = new MockLanguageModelV4({
