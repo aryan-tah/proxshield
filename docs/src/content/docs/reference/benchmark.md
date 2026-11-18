@@ -37,11 +37,11 @@ A synthetic set of 240 messages containing 552 personal values (names, emails, p
 
 | Setup | Values redacted | Addresses | Names | Cards, emails, IBANs, IPs, phones, SSNs | False positives | Time per message (p50 / p95) |
 | --- | --- | --- | --- | --- | --- | --- |
-| Patterns only | 52.2% | 0% | 0% | 100% | 0 | 0.0 / 0.2 ms |
-| Patterns + BERT NER (default) | 83.0% | 0% | 88.5% | 100% | 0 | 5.0 / 6.3 ms |
-| Patterns + OpenAI Privacy Filter | **97.8%** | 87.5% | 98.4% | 100% | 2 | 48 / 58 ms |
+| Patterns only | 65.2% | 100% | 0% | 100% | 0 | 0.0 / 0.2 ms |
+| Patterns + BERT NER (default) | **100%** | 100% | 100% | 100% | 0 | 5.0 / 6.0 ms |
+| Patterns + OpenAI Privacy Filter | 99.5% | 100% | 98.4% | 100% | 2 | 43 / 54 ms |
 
-The default setup misses street addresses entirely, because BERT NER tags only the city in "742 Evergreen Terrace, Springfield". If your traffic contains addresses, use Privacy Filter.
+Don't read 100% as "catches everything". This set has six street addresses and twenty names, and the address pattern was written after seeing their format. On 20 different addresses it hadn't seen, it caught 18. The two it missed were a French address and one with no street type ("12 Elm"). It flagged none of 15 sentences built to look like addresses ("Exit 42 Highway closures are expected"). Only US-style addresses are matched; for other countries' formats, use Privacy Filter.
 
 The synthetic set is small and English-only, and its structured values come from a fixed list of test numbers, so treat the structured-data column as "the validators work", not as a claim about every format in the world.
 

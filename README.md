@@ -67,7 +67,7 @@ npx proxshield scan "Hi, I'm Jordan Lee. Call me at (415) 555-0132."
 
 ## What it does
 
-- **Finds personal data three ways.** Patterns with validity checks for structured data (Luhn for cards, mod-97 for IBANs, libphonenumber for phones, never-issued ranges for SSNs, 11 published API key formats plus private keys, JWTs and connection-string passwords). A small NER model for names. Or OpenAI's [Privacy Filter](https://huggingface.co/openai/privacy-filter), which also finds street addresses and account numbers.
+- **Finds personal data three ways.** Patterns with validity checks for structured data (Luhn for cards, mod-97 for IBANs, libphonenumber for phones, never-issued ranges for SSNs, 11 published API key formats plus private keys, JWTs and connection-string passwords), plus US street addresses. A small NER model for names. Or OpenAI's [Privacy Filter](https://huggingface.co/openai/privacy-filter), which also finds street addresses and account numbers.
 - **Round-trips placeholders.** The same value gets the same placeholder across the whole conversation, and placeholders split across streamed chunks are put back correctly. Secrets are masked and never restored.
 - **Blocks injection where it actually comes from.** User messages and tool results are checked with rules (including invisible Unicode tag smuggling and lookalike letters) and Meta's Llama Prompt Guard 2. Tool results are also scored a few sentences at a time, so one planted instruction in a long document isn't averaged away.
 - **Drop-in for four APIs.** OpenAI Chat Completions, Anthropic Messages, Lakera Guard `/v2/guard`, and LLM Guard's `/analyze` and `/scan` endpoints.
@@ -79,7 +79,7 @@ From the [benchmark](https://proxshield.aryantah.com/reference/benchmark/), run 
 
 | | Default | Alternative |
 | --- | --- | --- |
-| Personal values redacted (552 synthetic values) | 83.0% | 97.8% with Privacy Filter |
+| Personal values redacted (552 synthetic values) | 100% | 99.5% with Privacy Filter |
 | Gandalf injection attacks caught | 93.8% | 100% with Protect AI's model |
 | Injections hidden in documents caught | 27% | 51% with Protect AI's model |
 | False alarms on 400 ordinary instructions | 0 | 0 |

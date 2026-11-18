@@ -36,7 +36,7 @@
         "falsePositiveRate": 0,
         "precision": 1
       },
-      "msPerItem": 7.682092318965515
+      "msPerItem": 6.173942887931035
     },
     {
       "classifier": "prompt-guard-2",
@@ -72,7 +72,7 @@
         "falsePositiveRate": null,
         "precision": 1
       },
-      "msPerItem": 1.4678537946428574
+      "msPerItem": 1.2971045446428573
     },
     {
       "classifier": "prompt-guard-2",
@@ -108,7 +108,7 @@
         "falsePositiveRate": 0,
         "precision": null
       },
-      "msPerItem": 3.444145105
+      "msPerItem": 2.748954789999999
     },
     {
       "classifier": "prompt-guard-2",
@@ -144,7 +144,7 @@
         "falsePositiveRate": 0.04,
         "precision": 0
       },
-      "msPerItem": 1.9638108399999874
+      "msPerItem": 1.8451624999999876
     },
     {
       "classifier": "prompt-guard-2",
@@ -180,7 +180,7 @@
         "falsePositiveRate": 0,
         "precision": 1
       },
-      "msPerItem": 198.89057708
+      "msPerItem": 159.95130292000002
     },
     {
       "classifier": "protectai",
@@ -216,7 +216,7 @@
         "falsePositiveRate": 0,
         "precision": 1
       },
-      "msPerItem": 16.78276796551723
+      "msPerItem": 15.693515439655162
     },
     {
       "classifier": "protectai",
@@ -252,7 +252,7 @@
         "falsePositiveRate": null,
         "precision": 1
       },
-      "msPerItem": 2.961678196428563
+      "msPerItem": 2.5804192767857006
     },
     {
       "classifier": "protectai",
@@ -288,7 +288,7 @@
         "falsePositiveRate": 0,
         "precision": null
       },
-      "msPerItem": 7.170560312499983
+      "msPerItem": 6.173054895000004
     },
     {
       "classifier": "protectai",
@@ -324,7 +324,7 @@
         "falsePositiveRate": 0.26,
         "precision": 0
       },
-      "msPerItem": 3.964917500000156
+      "msPerItem": 3.655485839999892
     },
     {
       "classifier": "protectai",
@@ -360,7 +360,7 @@
         "falsePositiveRate": 0.01,
         "precision": 0.9807692307692307
       },
-      "msPerItem": 427.1773312499999
+      "msPerItem": 357.948814375
     }
   ],
   "pii": [
@@ -368,10 +368,10 @@
       "name": "Patterns only",
       "cases": 252,
       "values": 552,
-      "leaked": 264,
-      "redactedValues": 0.5217391304347826,
+      "leaked": 192,
+      "redactedValues": 0.6521739130434783,
       "falsePositives": 0,
-      "findings": 288,
+      "findings": 360,
       "perEntity": {
         "PERSON": {
           "total": 192,
@@ -405,8 +405,8 @@
         },
         "ADDRESS": {
           "total": 72,
-          "caught": 0,
-          "recall": 0
+          "caught": 72,
+          "recall": 1
         },
         "IP_ADDRESS": {
           "total": 24,
@@ -414,22 +414,22 @@
           "recall": 1
         }
       },
-      "p50Ms": 0.04329199998755939,
-      "p95Ms": 0.1843339999904856
+      "p50Ms": 0.0438750000030268,
+      "p95Ms": 0.18216700002085418
     },
     {
       "name": "Patterns + BERT NER (default)",
       "cases": 252,
       "values": 552,
-      "leaked": 94,
-      "redactedValues": 0.8297101449275363,
+      "leaked": 0,
+      "redactedValues": 1,
       "falsePositives": 0,
-      "findings": 458,
+      "findings": 552,
       "perEntity": {
         "PERSON": {
           "total": 192,
-          "caught": 170,
-          "recall": 0.8854166666666666
+          "caught": 192,
+          "recall": 1
         },
         "EMAIL": {
           "total": 96,
@@ -458,8 +458,8 @@
         },
         "ADDRESS": {
           "total": 72,
-          "caught": 0,
-          "recall": 0
+          "caught": 72,
+          "recall": 1
         },
         "IP_ADDRESS": {
           "total": 24,
@@ -467,17 +467,17 @@
           "recall": 1
         }
       },
-      "p50Ms": 4.967207999987295,
-      "p95Ms": 6.280957999988459
+      "p50Ms": 4.95970799998031,
+      "p95Ms": 6.049417000001995
     },
     {
       "name": "Patterns + OpenAI Privacy Filter",
       "cases": 252,
       "values": 552,
-      "leaked": 12,
-      "redactedValues": 0.9782608695652174,
+      "leaked": 3,
+      "redactedValues": 0.9945652173913043,
       "falsePositives": 2,
-      "findings": 548,
+      "findings": 551,
       "perEntity": {
         "PERSON": {
           "total": 192,
@@ -511,8 +511,8 @@
         },
         "ADDRESS": {
           "total": 72,
-          "caught": 63,
-          "recall": 0.875
+          "caught": 72,
+          "recall": 1
         },
         "IP_ADDRESS": {
           "total": 24,
@@ -520,8 +520,8 @@
           "recall": 1
         }
       },
-      "p50Ms": 48.10679099999834,
-      "p95Ms": 58.414916000008816
+      "p50Ms": 43.43450000000303,
+      "p95Ms": 53.687874999974156
     }
   ]
 }
