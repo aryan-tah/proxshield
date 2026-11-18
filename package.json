@@ -38,7 +38,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "proxshield": "./dist/bin.js"
+    "proxshield": "dist/bin.js"
   },
   "files": [
     "dist",
@@ -50,7 +50,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
     "test": "vitest run",
     "test:models": "PROXSHIELD_TEST_MODELS=1 vitest run test/models.test.ts",
     "test:watch": "vitest",

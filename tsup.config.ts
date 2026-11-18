@@ -9,7 +9,6 @@ export default defineConfig([
     format: ["esm"],
     target: "node20",
     dts: true,
-    clean: true,
     sourcemap: true,
     external: ["@ai-sdk/provider"],
     define: { __VERSION__: JSON.stringify(version) },
