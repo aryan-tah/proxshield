@@ -69,13 +69,13 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
-    "@biomejs/biome": "2.6.7",
-    "@types/node": "^22.20.5",
+    "@biomejs/biome": "2.6.8",
+    "@types/node": "^26.6.6",
     "ai": "^7.0.176",
     "openai": "^7.59.0",
     "tsup": "9.0.0",
-    "typescript": "^6.0.3",
-    "vitest": "5.1.0"
+    "typescript": "^7.0.2",
+    "vitest": "5.1.1"
   },
   "publishConfig": {
     "access": "public",
